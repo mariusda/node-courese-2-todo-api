@@ -31,7 +31,8 @@ app.post('/todos',(req,res)=>{
     });
 });
 
-
+// We will export the app to use it from the tests/server.test.js
+module.exports = {app}; 
 
 
 app.listen(8080,()=>{

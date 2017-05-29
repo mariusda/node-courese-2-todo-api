@@ -11,9 +11,12 @@ var Todo = mongoose.model('Todo',{
     type:Boolean,
     default:false
   },
-  completedAt:{
+  beginedAt:{
     type:Date,
     default:Date.now
+  },
+  completedAt:{
+    type:Date
   }
 
 });
