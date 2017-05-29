@@ -4,16 +4,16 @@ const request = require('supertest'); // test routes
 const {Todo} = require('./../models/todo');
 const {app} = require('./../server');
 
+const todos = [{text:'First todo in the list'},{text:'Second todo in the list'}];
+
+
 var text = 'new to do test';
 
 // beforeEatch willbe called before eatch tests are run
 beforeEach((done)=>{
-  Todo.remove({text}).then((res)=>{
-    return done();
-  },
-  (e)=>{
-    return done(e);
-  });
+  Todo.remove({}).then(()=> {
+    return Todo.insertMany(todos);
+  }).then(()=>{done()});
 });
 
 describe('POST /todos',()=>{
@@ -45,8 +45,6 @@ describe('POST /todos',()=>{
       });
 
       it('should not create a new todo',(done)=>{
-
-
       request(app)
         .post('/todos')
         .send({})
@@ -54,19 +52,26 @@ describe('POST /todos',()=>{
         .end((err,res)=>{
           if(err){return done(err);};
 
-          Todo.find({text}).then((res)=>{
-            expect(res.length).toBe(0);
+          Todo.find().then((res)=>{
+            expect(res.length).toBe(2);
             done();
           }).catch((e)=> done(e)); // catch errors for the find
 
         });
-        });
+      });
+});
 
+describe('GET /todoes',()=>{
 
-
-
-
-
-
+  it('shoud return todos from GET /todos route',(done)=>{
+    request(app)
+      .get('/todos')
+      .expect(200)
+      .expect((res)=>{
+        expect(res.body.todos.length).toBe(2);
+      })
+      .end((err)=>{done(err)});
 
   });
+
+});
