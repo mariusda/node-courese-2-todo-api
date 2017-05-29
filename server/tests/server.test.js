@@ -8,23 +8,20 @@ var text = 'new to do test';
 
 // beforeEatch willbe called before eatch tests are run
 beforeEach((done)=>{
-  Todo.remove({text}).then(()=>{
-    done();
+  Todo.remove({text}).then((res)=>{
+    return done();
+  },
+  (e)=>{
+    return done(e);
   });
 });
-
-
-
-
-
-
 
 describe('POST /todos',()=>{
   // we use mocha module to construct the tests
   // because we call an asincroniuos function we expect that
   // we get the done back when the test is over
   it('shoud create a new to do',(done)=>{
-    var text = 'new to do test';
+  //  var text = 'new to do test';
 
     request(app)
       .post('/todos')
@@ -44,7 +41,32 @@ describe('POST /todos',()=>{
             done();
           }).catch((e)=>{done(e)}); // if the length or the text is not ok the catch statement will return the error
 
-
         });
       });
+
+      it('should not create a new todo',(done)=>{
+
+
+      request(app)
+        .post('/todos')
+        .send({})
+        .expect(400)
+        .end((err,res)=>{
+          if(err){return done(err);};
+
+          Todo.find({text}).then((res)=>{
+            expect(res.length).toBe(0);
+            done();
+          }).catch((e)=> done(e)); // catch errors for the find
+
+        });
+        });
+
+
+
+
+
+
+
+
   });
