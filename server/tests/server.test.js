@@ -1,11 +1,13 @@
 const expect = require('expect'); // test assertion
 const request = require('supertest'); // test routes
+const {ObjectID} = require('mongodb');
 
 const {Todo} = require('./../models/todo');
 const {app} = require('./../server');
 
-const todos = [{text:'First todo in the list'},{text:'Second todo in the list'}];
-
+const todos = [
+  {_id:new ObjectID(),text:'First todo in the list'},
+  {_id:new ObjectID(),text:'Second todo in the list'} ];
 
 var text = 'new to do test';
 
@@ -61,7 +63,7 @@ describe('POST /todos',()=>{
       });
 });
 
-describe('GET /todoes',()=>{
+describe('GET /todos',()=>{
 
   it('shoud return todos from GET /todos route',(done)=>{
     request(app)
@@ -73,5 +75,33 @@ describe('GET /todoes',()=>{
       .end((err)=>{done(err)});
 
   });
+
+});
+
+
+describe('GET/todos/:id',()=>{
+
+  it('shoud return a todo by GET /todos/:id',(done)=>{
+    request(app)
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res)=>{
+        expect(res.body.todo.text).toBe(todos[0].text);
+      }).end(done);
+  });
+
+ it('shoud return 404 for GET /todos/:id with inexistent id',(done)=>{
+   request(app)
+    .get(`/todos/${(new ObjectID).toHexString()}`)
+    .expect(404)
+    .end(done);
+ });
+
+ it('shoud return 404 for GET /todos/:id with invalid id',(done)=>{
+   request(app)
+    .get(`/todos/23456`)
+    .expect(404)
+    .end(done);
+ });
 
 });
