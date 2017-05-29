@@ -31,10 +31,19 @@ app.post('/todos',(req,res)=>{
     });
 });
 
+app.get('/todos',(req,res)=>{
+  Todo.find().then((todos)=>{
+    res.send({todos});
+  },(e)=>{
+    res.status(400).send(e);
+  });
+});
+
+
+
+
 // We will export the app to use it from the tests/server.test.js
-module.exports = {app}; 
-
-
+module.exports = {app};
 app.listen(8080,()=>{
   console.log('Started on port 8080');
 });
