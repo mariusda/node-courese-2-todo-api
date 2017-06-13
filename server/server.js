@@ -1,10 +1,11 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
-var {mongoose} = require('./db/mongoose'); // database initialization
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+const {mongoose} = require('./db/mongoose'); // database initialization
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 var app = express();
 const port = process.env.PORT || 8080;
@@ -76,6 +77,51 @@ app.delete('/todos/:id',(req,res)=>{
 
 
 });
+
+// PUT /todos/:id
+// Documentation https://docs.mongodb.com/v3.2/reference/method/db.collection.findOneAndUpdate/
+// app.put('/todos/:id',(req,res)=>{
+//   var id = req.params.id;
+//   if (!ObjectID.isValid(id)){
+//     return res.status(400).send();
+//   };
+//   Todo.findOneAndUpdate({_id:id},{$set:{completed:true},$currentDate:{completedAt:true}},{new:true})
+//   .then(
+//     (todo)=>{
+//       res.send({todo});
+//     })
+//   .catch((err)=>{
+//     return res.status(400).send();
+//   });
+// });
+
+// PATCH /todos/:id
+app.patch('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+    if (!ObjectID.isValid(id)){
+      return res.status(400).send();
+    };
+  var body = _.pick(req.body,['text','completed']);
+
+if (_.isBoolean(body.completed) && body.completed ){
+  body.completedAt = new Date(Date.now()).toISOString();
+  } else {
+  body.completedAt = null;
+}
+
+Todo.findByIdAndUpdate(id,{$set:body},{new:true})
+.then((todo)=>{
+  if(!todo){
+    res.status(404).send();
+  }
+    res.send({todo:todo});
+  })
+  .catch((err)=>{
+    res.status(400).send(err);
+  });
+
+});
+
 
 // We will export the app to use it from the tests/server.test.js
 module.exports = {app};
