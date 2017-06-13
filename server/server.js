@@ -7,7 +7,7 @@ var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 
 var app = express();
-
+const port = process.env.PORT || 8080;
 //Parse incoming request bodies in a middleware before your handlers, available under the req.body property.
 //  https://github.com/expressjs/body-parser
 app.use(bodyParser.json());
@@ -44,7 +44,7 @@ app.get('/todos',(req,res)=>{
 app.get('/todos/:id',(req,res)=>{
   var id = req.params.id;
   if (!ObjectID.isValid(id)){
-    return res.status(404).send();
+    return res.status(400).send();
   };
     Todo.findById({_id:id}).then(
       (todo)=>{
@@ -52,15 +52,33 @@ app.get('/todos/:id',(req,res)=>{
           return res.status(404).send();
         };
       res.send({todo});
-    },(err)=>{
-      res.status(400).send();
+    }).catch((err)=>{
+      res.status(400).send(err);
     });
 });
 
+// DELETE /todos/:id
+app.delete('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)){
+    return res.status(400).send();
+  };
+  Todo.findByIdAndRemove({_id:id}).then(
+    (todo)=>{
+      if(!todo){
+        return res.status(404).send();
+      };
+      res.send({todo});
+    },(err)=>{
+      res.status(400).send();
+    }
+  );
 
+
+});
 
 // We will export the app to use it from the tests/server.test.js
 module.exports = {app};
-app.listen(8080,()=>{
-  console.log('Started on port 8080');
+app.listen(port,()=>{
+  console.log(`Started on port ${port}`);
 });
