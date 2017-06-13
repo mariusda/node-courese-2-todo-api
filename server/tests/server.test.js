@@ -10,7 +10,7 @@ const todos = [
   {_id:new ObjectID(),text:'Second todo in the list'} ];
 
 var text = 'new to do test';
-
+var newtext = 'pathed todo text';
 // beforeEatch willbe called before eatch tests are run
 beforeEach((done)=>{
   Todo.remove({}).then(()=> {
@@ -53,7 +53,6 @@ describe('POST /todos',()=>{
         .expect(400)
         .end((err,res)=>{
           if(err){return done(err);};
-
           Todo.find().then((res)=>{
             expect(res.length).toBe(2);
             done();
@@ -127,6 +126,38 @@ describe('DELETE /todos/:id',()=>{
     request(app)
      .delete(`/todos/23456`)
      .expect(400)
+     .end(done);
+  });
+
+
+
+});
+
+describe('PATCH /todos/:id',()=>{
+  it('should patch an existing todo',(done)=>{
+    request(app)
+    .patch(`/todos/${todos[0]._id.toHexString()}`)
+    .send({text:newtext,completed:true})
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo.text).toBe(newtext);
+      expect(res.body.todo.completed).toBe(true);
+    })
+    .end(done);
+
+  });
+
+  it('shoud return 404 for PATCH /todos/:id with invalid id',(done)=>{
+    request(app)
+     .patch(`/todos/23456`)
+     .expect(400)
+     .end(done);
+  });
+
+  it('shoud return 404 for PATCH /todos/:id with non existing id',(done)=>{
+    request(app)
+     .patch(`/todos/${(new ObjectID).toHexString()}`)
+     .expect(404)
      .end(done);
   });
 

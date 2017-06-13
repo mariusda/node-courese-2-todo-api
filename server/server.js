@@ -112,7 +112,7 @@ if (_.isBoolean(body.completed) && body.completed ){
 Todo.findByIdAndUpdate(id,{$set:body},{new:true})
 .then((todo)=>{
   if(!todo){
-    res.status(404).send();
+    return res.status(404).send();
   }
     res.send({todo:todo});
   })
